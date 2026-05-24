@@ -1,15 +1,22 @@
 # AgentToolkit
 
-AgentToolkit is a lightweight .NET toolkit for defining tools and connecting LLM chat clients.
+AgentToolkit is a lightweight .NET library for building tool-calling workflows around LLM chat clients.
 
-## Install
+The project provides shared message and tool definitions, attribute-based tool metadata, a tool manager for parsing and invoking registered tools, and client adapters for OpenAI-compatible chat completion flows.
 
-```powershell
-dotnet add package AgentToolkit --version 0.1.0
-```
+## Project Layout
 
-For GitHub Packages, configure the NuGet source:
+- `AgentToolkit`: core library.
+- `AgentToolkit.Samples`: local sample project for exercising the library.
+- `AgentToolkit.Tests`: unit tests for message handling and tool management.
 
-```powershell
-dotnet nuget add source https://nuget.pkg.github.com/kirnot92/index.json --name github
-```
+## Scope
+
+AgentToolkit focuses on the small pieces needed to connect application-defined tools with chat-based LLM clients:
+
+- define tools and arguments with attributes;
+- convert registered tools into model-facing definitions;
+- parse and execute model-requested tool calls;
+- represent user, assistant, and tool messages consistently;
+- call OpenAI and llama.cpp-compatible chat clients through a common interface.
+
