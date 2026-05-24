@@ -43,6 +43,18 @@ namespace AgentToolkit.LLMClients.OpenAI
 
         private static ChatTool ToChatTool(ToolDefinition tool)
         {
+            var functionParameters = !string.IsNullOrWhiteSpace(tool.InputJsonSchema)
+                ? BinaryData.FromString(tool.InputJsonSchema)
+                : BinaryData.FromString(JsonSerializer.Serialize(CreateSchema(tool)));
+
+            return ChatTool.CreateFunctionTool(
+                functionName: tool.Name,
+                functionDescription: tool.Description,
+                functionParameters: functionParameters);
+        }
+
+        private static object CreateSchema(ToolDefinition tool)
+        {
             var schema = new
             {
                 type = "object",
@@ -60,10 +72,7 @@ namespace AgentToolkit.LLMClients.OpenAI
                 additionalProperties = false
             };
 
-            return ChatTool.CreateFunctionTool(
-                functionName: tool.Name,
-                functionDescription: tool.Description,
-                functionParameters: BinaryData.FromString(JsonSerializer.Serialize(schema)));
+            return schema;
         }
 
         private static ToolCall ToToolCall(ChatToolCall toolCall)

@@ -4,6 +4,7 @@ namespace AgentToolkit.Definitions
     {
         public string Name { get; init; } = "";
         public string Description { get; init; } = "";
+        public string? InputJsonSchema { get; init; }
         public List<ToolArgumentDefinition> Arguments { get; init; } = new();
         public List<string> Groups { get; init; } = new();
     }

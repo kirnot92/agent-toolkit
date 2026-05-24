@@ -2,7 +2,7 @@ using AgentToolkit.Definitions;
 
 namespace AgentToolkit.Tools
 {
-    public sealed class ToolManager
+    public sealed class ToolManager : IAsyncDisposable
     {
         private readonly List<IToolProvider> providers = new();
         private Dictionary<string, IToolProvider>? toolRoutes;
@@ -92,6 +92,14 @@ namespace AgentToolkit.Tools
             }
 
             return await provider.Execute(toolCall, cancellationToken);
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            foreach (var provider in this.providers.OfType<IAsyncDisposable>())
+            {
+                await provider.DisposeAsync();
+            }
         }
     }
 }
