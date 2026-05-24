@@ -12,4 +12,6 @@ TestResults/
 *.coverage
 *.coveragexml
 
+artifacts/
+
 *.log
