@@ -1,22 +1,69 @@
 # AgentToolkit
 
-AgentToolkit is a lightweight .NET library for building tool-calling workflows around LLM chat clients.
+AgentToolkit is a lightweight .NET toolkit for building tool-calling workflows around chat-based LLM clients.
 
-The project provides shared message and tool definitions, attribute-based tool metadata, a tool manager for parsing and invoking registered tools, and client adapters for OpenAI-compatible chat completion flows.
+It provides message and tool definitions, attribute-based local tool discovery, a provider-based tool manager, OpenAI-compatible chat client adapters, and an optional MCP integration package.
 
-## Project Layout
+## Projects
 
-- `AgentToolkit`: core library.
-- `AgentToolkit.Samples`: local sample project for exercising the library.
-- `AgentToolkit.Tests`: unit tests for message handling and tool management.
+- `AgentToolkit`: core library for local tools, messages, tool routing, and LLM client adapters.
+- `AgentToolkit.Mcp`: optional MCP tool provider integration.
+- `AgentToolkit.Samples`: local samples for core and MCP tool flows.
+- `AgentToolkit.Tests`: unit tests for message handling, tool routing, and MCP naming.
 
-## Scope
+## Status
 
-AgentToolkit focuses on the small pieces needed to connect application-defined tools with chat-based LLM clients:
+This project is early-stage and not published as a NuGet package yet. Use project references when trying it locally.
 
-- define tools and arguments with attributes;
-- convert registered tools into model-facing definitions;
-- parse and execute model-requested tool calls;
-- represent user, assistant, and tool messages consistently;
-- call OpenAI and llama.cpp-compatible chat clients through a common interface.
+## Core Usage
+
+Local tools are regular `ITool` implementations annotated with `ToolAttribute` and constructor `ToolArgumentAttribute` metadata.
+
+```csharp
+var toolManager = ToolManager.Create()
+    .AddLocalTools();
+
+var tools = await toolManager.GetTools(cancellationToken);
+var response = await llm.Call(messages, tools);
+
+foreach (var toolCall in response.ToolCalls)
+{
+    var toolResult = await toolManager.Execute(toolCall, cancellationToken);
+    messages.Add(Message.CreateToolCallResult(toolCall.Id, toolResult));
+}
+```
+
+## MCP Usage
+
+MCP support lives in `AgentToolkit.Mcp` so the core package does not depend on MCP transports or lifecycle management.
+
+```csharp
+using AgentToolkit.Mcp;
+
+await using var toolManager = ToolManager.Create()
+    .AddLocalTools()
+    .AddMcpServer("filesystem", new McpServerOptions
+    {
+        Command = "npx",
+        Arguments =
+        [
+            "-y",
+            "@modelcontextprotocol/server-filesystem",
+            workspacePath
+        ]
+    });
+```
+
+MCP tools are exposed with server-prefixed names by default, such as `mcp_filesystem__read_file`, while calls are routed back to the original MCP tool names internally.
+
+## Development
+
+```powershell
+dotnet build .\AgentToolkit.slnx --configuration Release
+dotnet test .\AgentToolkit.slnx --configuration Release --no-build
+dotnet pack .\AgentToolkit\AgentToolkit.csproj --configuration Release --no-build
+dotnet pack .\AgentToolkit.Mcp\AgentToolkit.Mcp.csproj --configuration Release --no-build
+```
+
+The solution currently targets `net10.0`.
 
