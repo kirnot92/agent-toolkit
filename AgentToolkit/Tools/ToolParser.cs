@@ -57,23 +57,6 @@ namespace AgentToolkit.Tools
             return tool;
         }
 
-        public static string CreateDebugText(ToolCall toolCall)
-        {
-            if (!toolDescriptors.TryGetValue(toolCall.ToolName, out var descriptor))
-            {
-                throw new InvalidOperationException($"Tool '{toolCall.ToolName}' is not registered.");
-            }
-
-            var arguments = BindArguments(toolCall, descriptor);
-            var argumentText = descriptor.Parameters
-                .Select((parameter, index) => $"{parameter.ArgumentName}={arguments[index]}")
-                .ToList();
-
-            return argumentText.Count == 0
-                ? descriptor.ToolType.Name
-                : $"{descriptor.ToolType.Name} {string.Join(", ", argumentText)}";
-        }
-
         private static ToolDescriptor CreateDescriptor(Type toolType)
         {
             if (!typeof(ITool).IsAssignableFrom(toolType))

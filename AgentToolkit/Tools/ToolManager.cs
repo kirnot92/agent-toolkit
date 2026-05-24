@@ -2,44 +2,96 @@ using AgentToolkit.Definitions;
 
 namespace AgentToolkit.Tools
 {
-    public static class ToolManager
+    public sealed class ToolManager
     {
-        private static bool debugMode;
+        private readonly List<IToolProvider> providers = new();
+        private Dictionary<string, IToolProvider>? toolRoutes;
+        private bool debugMode;
 
-        public static void EnableDebugLog(bool enabled = true)
+        private ToolManager()
         {
-            debugMode = enabled;
         }
 
-        public static IReadOnlyList<ToolDefinition> GetTools()
+        public static ToolManager Create()
         {
-            return ToolParser.ToolDefinitions.ToList();
+            return new ToolManager();
         }
 
-        public static IReadOnlyList<ToolDefinition> GetTools(params string[] groups)
+        public ToolManager AddProvider(IToolProvider provider)
         {
-            if (groups.Length == 0)
+            ArgumentNullException.ThrowIfNull(provider);
+
+            this.providers.Add(provider);
+            this.toolRoutes = null;
+            return this;
+        }
+
+        public ToolManager AddLocalTools(params string[] groups)
+        {
+            return this.AddProvider(new LocalToolProvider(groups));
+        }
+
+        public ToolManager EnableDebugLog(bool enabled = true)
+        {
+            this.debugMode = enabled;
+            return this;
+        }
+
+        public async Task<IReadOnlyList<ToolDefinition>> GetTools(
+            CancellationToken cancellationToken = default)
+        {
+            var tools = new List<ToolDefinition>();
+            var routes = new Dictionary<string, IToolProvider>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var provider in this.providers)
             {
-                return GetTools();
+                cancellationToken.ThrowIfCancellationRequested();
+
+                var providerTools = await provider.GetTools(cancellationToken);
+                foreach (var tool in providerTools)
+                {
+                    if (string.IsNullOrWhiteSpace(tool.Name))
+                    {
+                        throw new InvalidOperationException("Tool name cannot be empty.");
+                    }
+
+                    if (!routes.TryAdd(tool.Name, provider))
+                    {
+                        throw new InvalidOperationException($"Tool '{tool.Name}' is already registered.");
+                    }
+
+                    tools.Add(tool);
+                }
             }
 
-            var groupSet = new HashSet<string>(groups, StringComparer.OrdinalIgnoreCase);
-            return ToolParser.ToolDefinitions
-                .Where(tool => tool.Groups.Any(groupSet.Contains))
-                .ToList();
+            this.toolRoutes = routes;
+            return tools;
         }
 
-        public static async Task<ToolResult> Execute(
+        public async Task<ToolResult> Execute(
             ToolCall toolCall,
             CancellationToken cancellationToken = default)
         {
-            var tool = ToolParser.CreateTool(toolCall);
-            if (debugMode)
+            ArgumentNullException.ThrowIfNull(toolCall);
+
+            var routes = this.toolRoutes;
+            if (routes is null || !routes.ContainsKey(toolCall.ToolName))
             {
-                Console.WriteLine(ToolParser.CreateDebugText(toolCall));
+                await this.GetTools(cancellationToken);
+                routes = this.toolRoutes;
             }
 
-            return await tool.Execute(cancellationToken);
+            if (routes is null || !routes.TryGetValue(toolCall.ToolName, out var provider))
+            {
+                throw new InvalidOperationException($"Tool '{toolCall.ToolName}' is not registered.");
+            }
+
+            if (this.debugMode)
+            {
+                Console.WriteLine($"{toolCall.ToolName} {toolCall.ArgumentsJson}");
+            }
+
+            return await provider.Execute(toolCall, cancellationToken);
         }
     }
 }

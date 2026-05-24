@@ -10,7 +10,10 @@ namespace AgentToolkit.Samples
         public static async Task Run(string apiKey, CancellationToken cancellationToken = default)
         {
             var llm = new ChatGPTClient(apiKey);
-            var tools = ToolManager.GetTools("_SAMPLE_");
+            var toolManager = ToolManager.Create()
+                .AddLocalTools("_SAMPLE_")
+                .EnableDebugLog();
+            var tools = await toolManager.GetTools(cancellationToken);
 
             var step = 0;
             var maxStep = 10;
@@ -19,8 +22,6 @@ namespace AgentToolkit.Samples
             var rawMessage = "Add 5 and 10 and 5";
             Console.WriteLine(rawMessage);
             messages.Add(Message.Create(MessageRole.User, rawMessage));
-
-            ToolManager.EnableDebugLog();
 
             while (true)
             {
@@ -40,7 +41,7 @@ namespace AgentToolkit.Samples
 
                 foreach (var toolCall in response.ToolCalls)
                 {
-                    var toolResult = await ToolManager.Execute(toolCall, cancellationToken);
+                    var toolResult = await toolManager.Execute(toolCall, cancellationToken);
 
                     messages.Add(Message.CreateToolCallResult(toolCall.Id, toolResult));
                 }
