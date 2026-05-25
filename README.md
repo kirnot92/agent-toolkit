@@ -33,6 +33,20 @@ foreach (var toolCall in response.ToolCalls)
 }
 ```
 
+To ask the model for structured JSON response content, pass a JSON schema. The assistant response remains a regular
+`Message`; its raw JSON is available in `Content`.
+
+```csharp
+var response = await llm.Call(
+    messages,
+    tools,
+    JsonSchemaBuilder.Object()
+        .AddProperty(JsonSchemaType.String, "answer", "The answer to the user request.")
+        .Build());
+
+var json = response.Content;
+```
+
 ## MCP Usage
 
 MCP support lives in `AgentToolkit.Mcp` so the core package does not depend on MCP transports or lifecycle management.
@@ -66,4 +80,3 @@ dotnet pack .\AgentToolkit.Mcp\AgentToolkit.Mcp.csproj --configuration Release -
 ```
 
 The solution currently targets `net10.0`.
-

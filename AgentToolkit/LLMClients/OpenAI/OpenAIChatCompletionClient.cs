@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using AgentToolkit.Definitions;
 using OpenAI.Chat;
 
@@ -13,20 +14,18 @@ namespace AgentToolkit.LLMClients.OpenAI
             this.chatClient = chatClient;
         }
 
-        public async Task<Message> Call(List<Message> messages, IReadOnlyList<ToolDefinition> tools)
+        public async Task<Message> Call(
+            List<Message> messages,
+            IReadOnlyList<ToolDefinition> tools,
+            JsonObject? jsonSchema = null)
         {
             var openAiMessages = messages
                 .Select(message => message.ToOpenAiMessage())
                 .ToList();
 
-            var options = new ChatCompletionOptions();
+            var chatOptions = CreateOptions(tools, jsonSchema);
 
-            foreach (var tool in tools)
-            {
-                options.Tools.Add(ToChatTool(tool));
-            }
-
-            var completion = await this.chatClient.CompleteChatAsync(openAiMessages, options);
+            var completion = await this.chatClient.CompleteChatAsync(openAiMessages, chatOptions);
             var toolCalls = completion.Value.ToolCalls
                 .Select(ToToolCall)
                 .ToList();
@@ -39,6 +38,23 @@ namespace AgentToolkit.LLMClients.OpenAI
             return Message.Create(
                 MessageRole.Assistant,
                 string.Concat(completion.Value.Content.Select(content => content.Text)));
+        }
+
+        private static ChatCompletionOptions CreateOptions(
+            IReadOnlyList<ToolDefinition> tools,
+            JsonObject? jsonSchema)
+        {
+            var chatOptions = new ChatCompletionOptions
+            {
+                ResponseFormat = ToChatResponseFormat(jsonSchema)
+            };
+
+            foreach (var tool in tools)
+            {
+                chatOptions.Tools.Add(ToChatTool(tool));
+            }
+
+            return chatOptions;
         }
 
         private static ChatTool ToChatTool(ToolDefinition tool)
@@ -83,6 +99,19 @@ namespace AgentToolkit.LLMClients.OpenAI
                 ToolName = toolCall.FunctionName,
                 ArgumentsJson = toolCall.FunctionArguments.ToString()
             };
+        }
+
+        private static ChatResponseFormat? ToChatResponseFormat(JsonObject? jsonSchema)
+        {
+            if (jsonSchema is null)
+            {
+                return null;
+            }
+
+            return ChatResponseFormat.CreateJsonSchemaFormat(
+                jsonSchemaFormatName: "response",
+                jsonSchema: BinaryData.FromString(jsonSchema.ToJsonString()),
+                jsonSchemaIsStrict: true);
         }
 
         private static string ToJsonSchemaType(Type type)

@@ -1,4 +1,5 @@
 using System.ClientModel;
+using System.Text.Json.Nodes;
 using AgentToolkit.Definitions;
 using AgentToolkit.LLMClients.OpenAI;
 using OpenAI;
@@ -23,9 +24,12 @@ namespace AgentToolkit.LLMClients.LlamaServer
             this.client = new OpenAIChatCompletionClient(chatClient);
         }
 
-        public Task<Message> Call(List<Message> messages, IReadOnlyList<ToolDefinition> tools)
+        public Task<Message> Call(
+            List<Message> messages,
+            IReadOnlyList<ToolDefinition> tools,
+            JsonObject? jsonSchema = null)
         {
-            return this.client.Call(messages, tools);
+            return this.client.Call(messages, tools, jsonSchema);
         }
     }
 }
