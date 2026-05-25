@@ -2,18 +2,17 @@
 
 AgentToolkit is a lightweight .NET toolkit for building tool-calling workflows around chat-based LLM clients.
 
-It provides message and tool definitions, attribute-based local tool discovery, a provider-based tool manager, OpenAI-compatible chat client adapters, and an optional MCP integration package.
+It provides message and tool definitions, attribute-based local tool discovery, a provider-based tool manager, MCP tool integration, and OpenAI-compatible chat client adapters.
 
 ## Projects
 
-- `AgentToolkit`: core library for local tools, messages, tool routing, and LLM client adapters.
-- `AgentToolkit.Mcp`: optional MCP tool provider integration.
+- `AgentToolkit`: core library for local tools, MCP tools, messages, tool routing, and LLM client adapters.
 - `AgentToolkit.Samples`: local samples for core and MCP tool flows.
 - `AgentToolkit.Tests`: unit tests for message handling, tool routing, and MCP naming.
 
 ## Status
 
-This project is early-stage and not published as a NuGet package yet. Use project references when trying it locally.
+This project is early-stage. Use it as a source dependency or project reference for now.
 
 ## Core Usage
 
@@ -49,10 +48,10 @@ var json = response.Content;
 
 ## MCP Usage
 
-MCP support lives in `AgentToolkit.Mcp` so the core package does not depend on MCP transports or lifecycle management.
+MCP support is built into `AgentToolkit` because MCP tool providers are part of the default toolkit flow.
 
 ```csharp
-using AgentToolkit.Mcp;
+using AgentToolkit.Tools;
 
 await using var toolManager = ToolManager.Create()
     .AddLocalTools()
@@ -75,8 +74,6 @@ MCP tools are exposed with server-prefixed names by default, such as `mcp_filesy
 ```powershell
 dotnet build .\AgentToolkit.slnx --configuration Release
 dotnet test .\AgentToolkit.slnx --configuration Release --no-build
-dotnet pack .\AgentToolkit\AgentToolkit.csproj --configuration Release --no-build
-dotnet pack .\AgentToolkit.Mcp\AgentToolkit.Mcp.csproj --configuration Release --no-build
 ```
 
 The solution currently targets `net10.0`.

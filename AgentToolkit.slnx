@@ -1,6 +1,5 @@
 <Solution>
   <Project Path="AgentToolkit/AgentToolkit.csproj" />
-  <Project Path="AgentToolkit.Mcp/AgentToolkit.Mcp.csproj" />
   <Project Path="AgentToolkit.Samples/AgentToolkit.Samples.csproj" />
   <Project Path="AgentToolkit.Tests/AgentToolkit.Tests.csproj" />
 </Solution>

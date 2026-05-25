@@ -31,6 +31,13 @@ namespace AgentToolkit.Tools
             return this.AddProvider(new LocalToolProvider(groups));
         }
 
+        public ToolManager AddMcpServer(string serverName, McpServerOptions options)
+        {
+            ArgumentNullException.ThrowIfNull(options);
+
+            return this.AddProvider(new McpToolProvider(serverName, options));
+        }
+
         public ToolManager EnableDebugLog(bool enabled = true)
         {
             this.debugMode = enabled;

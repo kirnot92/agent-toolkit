@@ -1,10 +1,9 @@
 using System.Text.Json;
 using AgentToolkit.Definitions;
-using AgentToolkit.Tools;
 using ModelContextProtocol.Client;
 using ModelContextProtocol.Protocol;
 
-namespace AgentToolkit.Mcp
+namespace AgentToolkit.Tools
 {
     public sealed class McpToolProvider : IToolProvider, IAsyncDisposable
     {

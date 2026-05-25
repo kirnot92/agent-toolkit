@@ -16,7 +16,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AgentToolkit\AgentToolkit.csproj" />
-    <ProjectReference Include="..\AgentToolkit.Mcp\AgentToolkit.Mcp.csproj" />
   </ItemGroup>
 
   <ItemGroup>

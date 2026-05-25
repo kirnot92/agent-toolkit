@@ -8,7 +8,7 @@
     <Version>0.1.0</Version>
     <Authors>kirnot92</Authors>
     <Description>A lightweight toolkit for defining tools and connecting LLM chat clients.</Description>
-    <PackageTags>agent;llm;tool-calling;openai;llama-cpp;ai</PackageTags>
+    <PackageTags>agent;llm;tool-calling;mcp;openai;llama-cpp;ai</PackageTags>
     <PackageProjectUrl>https://github.com/kirnot92/agent-toolkit</PackageProjectUrl>
     <RepositoryUrl>https://github.com/kirnot92/agent-toolkit</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
@@ -19,6 +19,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="ModelContextProtocol" Version="1.3.0" />
     <PackageReference Include="OpenAI" Version="2.10.0" />
   </ItemGroup>
 

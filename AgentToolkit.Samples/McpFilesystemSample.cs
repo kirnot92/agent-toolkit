@@ -1,6 +1,5 @@
 using AgentToolkit.Definitions;
 using AgentToolkit.LLMClients.OpenAI;
-using AgentToolkit.Mcp;
 using AgentToolkit.Tools;
 
 namespace AgentToolkit.Samples

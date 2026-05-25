@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace AgentToolkit.Mcp
+namespace AgentToolkit.Tools
 {
     public static class McpToolNames
     {

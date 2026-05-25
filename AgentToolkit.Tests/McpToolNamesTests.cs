@@ -1,4 +1,4 @@
-using AgentToolkit.Mcp;
+using AgentToolkit.Tools;
 
 namespace AgentToolkit.Tests;
 

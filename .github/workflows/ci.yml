@@ -41,6 +41,3 @@ jobs:
 
       - name: Pack AgentToolkit
         run: dotnet pack AgentToolkit/AgentToolkit.csproj --configuration Release --no-build --output artifacts
-
-      - name: Pack AgentToolkit.Mcp
-        run: dotnet pack AgentToolkit.Mcp/AgentToolkit.Mcp.csproj --configuration Release --no-build --output artifacts

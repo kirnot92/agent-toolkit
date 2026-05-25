@@ -1,4 +1,4 @@
-namespace AgentToolkit.Mcp
+namespace AgentToolkit.Tools
 {
     public sealed class McpServerOptions
     {
